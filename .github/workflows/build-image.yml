@@ -1,0 +1,51 @@
+name: Build image
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - devenv.nix
+      - devenv.yaml
+      - devenv.lock
+      - .github/workflows/build-image.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Cache Nix store
+        uses: actions/cache@v6
+        with:
+          path: /nix
+          key: nix-${{ runner.os }}-${{ hashFiles('devenv.nix', 'devenv.yaml', 'devenv.lock') }}
+
+      - uses: cachix/install-nix-action@v31
+      - uses: cachix/cachix-action@v17
+        with:
+          name: devenv
+      - name: Install devenv
+        run: nix profile add nixpkgs#devenv
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # `devenv container copy` builds the image (via nix2container) and pushes it directly
+      # with skopeo -- no local Docker daemon needed. Destination is
+      # ghcr.io/emergentconnext/<containers.shell.name>:<containers.shell.version>.
+      - name: Build and push image
+        run: devenv container copy --registry docker://ghcr.io/emergentconnext/ shell

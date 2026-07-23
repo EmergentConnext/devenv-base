@@ -161,4 +161,7 @@ in
     migrate "$env"
     bundle-deploy "$env"
   '';
+
+  # explicit name since the default derives from a top-level `name` we don't otherwise set.
+  containers.shell.name = "devenv-base";
 }

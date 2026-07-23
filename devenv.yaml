@@ -1,5 +1,11 @@
-# yaml-language-server: $schema=https://devenv.sh/devenv.schema.json
 inputs:
+  mk-shell-bin:
+    url: github:rrbutani/nix-mk-shell-bin
+  nix2container:
+    url: github:nlewo/nix2container
+    inputs:
+      nixpkgs:
+        follows: nixpkgs
   nixpkgs:
     url: github:cachix/devenv-nixpkgs/rolling
   nixpkgs-python:
@@ -7,8 +13,6 @@ inputs:
     inputs:
       nixpkgs:
         follows: nixpkgs
-
 nixpkgs:
-  # databricks-cli is marked unfree in nixpkgs; it's the official Databricks CLI.
   permitted_unfree_packages:
-    - "databricks-cli"
+  - databricks-cli
