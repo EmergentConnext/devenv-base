@@ -59,6 +59,26 @@ skip the Nix/devenv install step entirely in CI. The package may be private to t
 if `docker pull` gets a 401/denied, `docker login ghcr.io` first with a token that has
 `read:packages` and org access, or make the package public in its GitHub package settings.
 
+## Binary cache
+
+`devenv.nix` declares a [cachix](https://devenv.sh/binary-caching/) cache, `emergent-connext`:
+
+```nix
+cachix.pull = [ "emergent-connext" ];
+cachix.push = "emergent-connext";
+```
+
+This caches every package built here (pulumi, databricks-cli, the nix2container/skopeo build,
+etc.) per-derivation by content hash, shared across CI and any local `devenv shell`.
+
+The cache is public for reads, so pulling from it needs no setup — anyone importing this module
+gets the speedup for free. Pushing needs a cachix auth token, since anyone could otherwise poison
+a public cache. In CI (`.github/workflows/build-image.yml`), that's the `CACHIX_AUTH_TOKEN` repo
+secret, consumed by a `cachix-action` step alongside the (separate, unrelated) public `devenv`
+cache used to speed up installing the devenv CLI itself. To push from a local machine too, get a
+token from [cachix.org](https://cachix.org) for the `emergent-connext` cache and export it as
+`CACHIX_AUTH_TOKEN` before running `devenv shell`.
+
 ## Using this repo in a devenv
 
 In the consuming project's `devenv.yaml`:

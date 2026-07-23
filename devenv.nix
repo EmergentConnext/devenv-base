@@ -40,6 +40,10 @@ let
   '';
 in
 {
+  # https://devenv.sh/binary-caching
+  cachix.pull = [ "emergent-connext" ];
+  cachix.push = "emergent-connext";
+
   overlays = [
     (final: prev: {
       pulumi = prev.stdenv.mkDerivation {

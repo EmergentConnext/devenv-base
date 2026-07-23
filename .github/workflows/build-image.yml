@@ -24,30 +24,14 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # Only /nix/store (built derivations) and the path-registration db need to survive
-      # across runs -- the rest of /nix/var/nix is daemon runtime state (locks, per-process
-      # temproots, the build-user pool), root/nixbld-owned and recreated fresh every run.
-      # actions/cache resolves a bare, non-wildcarded path (like the old `/nix`) as a single
-      # directory match instead of individual files, so `!exclude` lines never got a chance
-      # to filter anything -- tar then auto-recursed into the whole tree and choked on those
-      # unreadable files regardless. Listing `db/**` explicitly forces per-file matching so
-      # the excludes actually apply, and the bare `db` line drops the directory-entry match
-      # itself (otherwise tar would recurse into it again and hit the same excluded files).
-      - name: Cache Nix store
-        uses: actions/cache@v6
-        with:
-          path: |
-            /nix/store
-            /nix/var/nix/db/**
-            !/nix/var/nix/db
-            !/nix/var/nix/db/big-lock
-            !/nix/var/nix/db/reserved
-          key: nix-${{ runner.os }}-${{ hashFiles('devenv.nix', 'devenv.yaml', 'devenv.lock') }}
-
       - uses: cachix/install-nix-action@v31
       - uses: cachix/cachix-action@v17
         with:
           name: devenv
+      - uses: cachix/cachix-action@v17
+        with:
+          name: emergent-connext
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
       - name: Install devenv
         run: nix profile add nixpkgs#devenv
 
