@@ -15,20 +15,20 @@ let
     "aarch64-darwin".sha256 = "1qs0dqbr1vaalajr68brk1hn83cls011j1qr2ah3vkshxvr5br8z";
   }.${pkgs.system};
 
-  pulumiCli = pkgs.stdenv.mkDerivation {
-    pname = "pulumi";
-    version = pulumiVersion;
-    src = pkgs.fetchurl {
-      url = "https://get.pulumi.com/releases/sdk/pulumi-v${pulumiVersion}-${pulumiPlatform.os_arch}.tar.gz";
-      sha256 = pulumiPlatform.sha256;
-    };
-    dontUnpack = true;
-    installPhase = ''
-      mkdir -p $out/bin
-      tar xzf $src -C $out/bin --strip-components=1 \
-        pulumi/pulumi pulumi/pulumi-language-python pulumi/pulumi-language-python-exec
-    '';
-  };
+  # nixpkgs' databricks-cli builds the Go CLI from source and runs its full test suite as
+  # part of the derivation (~18min in CI) because it's unfree, so Hydra never caches a binary
+  # for it. Overlay it with the official prebuilt release binary instead.
+  databricksCliVersion = "1.2.1";
+  databricksCliPlatform = {
+    "x86_64-linux".os_arch = "linux_amd64";
+    "x86_64-linux".sha256 = "9321f89dc9087c6f9ee4c002e90728ba137491f80863c918465795d7c2ec3e95";
+    "aarch64-linux".os_arch = "linux_arm64";
+    "aarch64-linux".sha256 = "b784e156685b8fe5bdb62d5a730614a12e4f45ad17eff02c827e5bda3fb75f19";
+    "x86_64-darwin".os_arch = "darwin_amd64";
+    "x86_64-darwin".sha256 = "b9a9dc092465292c6a7d41744383e38a9a76726c5005aa1a2cd63bfd738d529b";
+    "aarch64-darwin".os_arch = "darwin_arm64";
+    "aarch64-darwin".sha256 = "c816e76abdc0b395c1b06385e92add9c52bd90961bef86257a4cd4e3e7b2a3cd";
+  }.${pkgs.system};
 
   # Every script exec is a shell body -- fail fast and don't silently swallow pipeline errors.
   strict = body: "set -euo pipefail\n" + body;
@@ -40,9 +40,43 @@ let
   '';
 in
 {
+  overlays = [
+    (final: prev: {
+      pulumi = prev.stdenv.mkDerivation {
+        pname = "pulumi";
+        version = pulumiVersion;
+        src = prev.fetchurl {
+          url = "https://get.pulumi.com/releases/sdk/pulumi-v${pulumiVersion}-${pulumiPlatform.os_arch}.tar.gz";
+          sha256 = pulumiPlatform.sha256;
+        };
+        dontUnpack = true;
+        installPhase = ''
+          mkdir -p $out/bin
+          tar xzf $src -C $out/bin --strip-components=1 \
+            pulumi/pulumi pulumi/pulumi-language-python pulumi/pulumi-language-python-exec
+        '';
+      };
+
+      databricks-cli = prev.stdenv.mkDerivation {
+        pname = "databricks-cli";
+        version = databricksCliVersion;
+        src = prev.fetchurl {
+          url = "https://github.com/databricks/cli/releases/download/v${databricksCliVersion}/databricks_cli_${databricksCliVersion}_${databricksCliPlatform.os_arch}.tar.gz";
+          sha256 = databricksCliPlatform.sha256;
+        };
+        dontUnpack = true;
+        installPhase = ''
+          mkdir -p $out/bin
+          tar xzf $src -C $out/bin databricks
+        '';
+        meta.license = lib.licenses.unfree;
+      };
+    })
+  ];
+
   packages = [
     pkgs.git
-    pulumiCli
+    pkgs.pulumi
     pkgs.databricks-cli
     pkgs.azure-cli
     pkgs.ruff

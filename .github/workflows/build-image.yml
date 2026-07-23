@@ -24,10 +24,21 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # Excludes are the nix-daemon's runtime state (locks, per-process temproots, the
+      # build-user pool) -- root/nixbld-owned, unreadable by the runner user, and pointless
+      # to cache anyway since the daemon recreates them fresh every run. Without these, tar
+      # exits non-zero on the permission errors and actions/cache silently skips the save,
+      # so every run was rebuilding the entire store from scratch.
       - name: Cache Nix store
         uses: actions/cache@v6
         with:
-          path: /nix
+          path: |
+            /nix
+            !/nix/var/nix/gc.lock
+            !/nix/var/nix/db/big-lock
+            !/nix/var/nix/db/reserved
+            !/nix/var/nix/temproots/**
+            !/nix/var/nix/userpool/**
           key: nix-${{ runner.os }}-${{ hashFiles('devenv.nix', 'devenv.yaml', 'devenv.lock') }}
 
       - uses: cachix/install-nix-action@v31
