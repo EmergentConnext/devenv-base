@@ -44,6 +44,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # ubuntu-latest ships an /etc/containers/registries.conf (from Podman) in the old v1
+      # format, which the skopeo build devenv/nix2container bundles refuses to parse at all --
+      # it fails before ever getting to credentials. Remove it; skopeo falls back to defaults.
+      - name: Remove incompatible registries.conf
+        run: sudo rm -f /etc/containers/registries.conf
+
       # `devenv container copy` builds the image (via nix2container) and pushes it directly
       # with skopeo -- no local Docker daemon needed. Destination is
       # ghcr.io/emergentconnext/<containers.shell.name>:<containers.shell.version>.

@@ -1,14 +1,8 @@
 { pkgs, lib, config, inputs, ... }:
 
 let
-  # `pulumi-bin` (the repackaged upstream release) has the core CLI plus the bundled language
-  # plugins Pulumi refuses to fetch separately for python ("reinstall via your package manager"),
-  # at the cost of ~40 extra per-cloud resource-provider tarballs bundled alongside (~4.6GB) that
-  # most consumers don't need. Pulumi downloads whichever providers a project actually uses
-  # (azure-native, azuread, databricks, ...) itself at runtime, per each SDK package's
-  # pulumi-plugin.json manifest.
-  # So instead: fetch just the small (~100MB) official SDK tarball ourselves, pinned to a
-  # deliberately-chosen release, and keep only the core CLI + language-python binaries from it.
+  # The `pulumi` package is outdated.
+  # The `pulumi-bin` alternative is newer, but packages 4.6GB of providers we don't need.
   pulumiVersion = "3.254.0";
   pulumiPlatform = {
     "x86_64-linux".os_arch = "linux-x64";
@@ -58,7 +52,8 @@ in
 
   languages.python = {
     enable = true;
-    version = "3.14";
+    # Use nixpkgs' package over the default which requires compilation.
+    package = pkgs.python314;
     uv.enable = true;
     uv.sync = {
       enable = true;
@@ -68,11 +63,7 @@ in
 
   languages.java = {
     enable = true;
-    # A true minimal JRE (nixpkgs' jreNN_minimal) only ships the java.base module and breaks
-    # Spark, which needs jdk.unsupported (sun.misc.Unsafe), java.sql, and java.management.
-    # This headless build has every module Spark needs, just without the GUI/X11 toolkit
-    # (~35% smaller closure than the full pkgs.jdk) -- nixpkgs doesn't offer anything leaner
-    # that's still Spark-compatible.
+    # This headless build is compatible with Spark without the GUI/X11 toolkit (~35% smaller)
     jdk.package = pkgs.jre_headless;
   };
 
