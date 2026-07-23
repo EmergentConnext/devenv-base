@@ -1,8 +1,6 @@
 { pkgs, lib, config, inputs, ... }:
 
 let
-  # The `pulumi` package is outdated.
-  # The `pulumi-bin` alternative is newer, but packages 4.6GB of providers we don't need.
   pulumiVersion = "3.254.0";
   pulumiPlatform = {
     "x86_64-linux".os_arch = "linux-x64";
@@ -15,9 +13,6 @@ let
     "aarch64-darwin".sha256 = "1qs0dqbr1vaalajr68brk1hn83cls011j1qr2ah3vkshxvr5br8z";
   }.${pkgs.system};
 
-  # nixpkgs' databricks-cli builds the Go CLI from source and runs its full test suite as
-  # part of the derivation (~18min in CI) because it's unfree, so Hydra never caches a binary
-  # for it. Overlay it with the official prebuilt release binary instead.
   databricksCliVersion = "1.2.1";
   databricksCliPlatform = {
     "x86_64-linux".os_arch = "linux_amd64";
@@ -94,7 +89,9 @@ in
     package = pkgs.python314;
     uv.enable = true;
     uv.sync = {
-      enable = true;
+      # Consuming projects have a pyproject.toml and get synced automatically; this module
+      # itself doesn't, so skip auto-sync rather than hard-failing `devenv shell` here.
+      enable = builtins.pathExists (config.devenv.root + "/pyproject.toml");
       allExtras = true;
     };
   };
@@ -129,7 +126,6 @@ in
   '';
 
   scripts."test-integration".exec = strict ''
-    migrate test
     uv run pytest -v -m integration "$@"
   '';
 
@@ -181,13 +177,8 @@ in
     databricks bundle deploy --target "$env" --profile DEFAULT
   '';
 
-  scripts."migrate".exec = envScript ''
-    uv run ecx migrate --env "$env" --profile DEFAULT
-  '';
-
   scripts."deploy".exec = envScript ''
     infra-deploy "$env"
-    migrate "$env"
     bundle-deploy "$env"
   '';
 
