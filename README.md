@@ -11,7 +11,7 @@ toolchain and scripts once, so individual projects don't redefine them.
   providers are downloaded by Pulumi at runtime.
 - `databricks-cli` — the official prebuilt release binary. nixpkgs' version builds the Go CLI from
   source; since it's unfree, Hydra never builds or caches a binary for it.
-- `azure-cli` — useful for local Azure queries.
+- `azure-cli` — useful for local Azure queries. Bundled with common extensions.
 - `ruff`, `sqruff`, `basedpyright` — Python linting and formatting.
 - Python 3.14 — nixpkg prebuilt binary.
 - Java — headless JRE; enough for PySpark without the full JDK/GUI toolkit

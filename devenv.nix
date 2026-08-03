@@ -25,6 +25,16 @@ let
     "aarch64-darwin".sha256 = "c816e76abdc0b395c1b06385e92add9c52bd90961bef86257a4cd4e3e7b2a3cd";
   }.${pkgs.system};
 
+  azureCli = pkgs.azure-cli.withExtensions (with pkgs.azure-cli-extensions; [
+    account
+    application-insights
+    databricks
+    quota
+    resource-graph
+    # Its pinned runtime deps don't satisfy nixpkgs' checker; the extension works regardless.
+    (containerapp.overridePythonAttrs (_: { dontCheckRuntimeDeps = true; }))
+  ]);
+
   # Every script exec is a shell body -- fail fast and don't silently swallow pipeline errors.
   strict = body: "set -euo pipefail\n" + body;
 
@@ -77,7 +87,7 @@ in
     pkgs.git
     pkgs.pulumi
     pkgs.databricks-cli
-    pkgs.azure-cli
+    azureCli
     pkgs.ruff
     pkgs.sqruff
     pkgs.basedpyright
