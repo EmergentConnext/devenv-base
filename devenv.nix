@@ -29,6 +29,8 @@ let
     account
     application-insights
     databricks
+    front-door
+    log-analytics
     quota
     resource-graph
     # Its pinned runtime deps don't satisfy nixpkgs' checker; the extension works regardless.
