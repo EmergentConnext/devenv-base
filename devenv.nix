@@ -1,28 +1,28 @@
 { pkgs, lib, config, inputs, ... }:
 
 let
-  pulumiVersion = "3.255.0";
+  pulumiVersion = "3.259.0";
   pulumiPlatform = {
     "x86_64-linux".os_arch = "linux-x64";
-    "x86_64-linux".sha256 = "1fhdwn7qkj607lmxvaasijx772d4bypfhggaasp7yby3w9l9amfg";
+    "x86_64-linux".sha256 = "1r8qyyjm94j5fz3k8gz11k3pn3ywk00b1i44813h2gf2r9x3bfll";
     "aarch64-linux".os_arch = "linux-arm64";
-    "aarch64-linux".sha256 = "1qzhh3hfccb181v7az40xiainyyj13qqfm34nglrgna8m1pbr7v9";
+    "aarch64-linux".sha256 = "0lv892zyg209k3chd9wh88j8m76sc98cz0ng6sxn08d7cds35j7d";
     "x86_64-darwin".os_arch = "darwin-x64";
-    "x86_64-darwin".sha256 = "004jagb6m3r0wdw06d14h0ffz3fidi624xvqx6yqw5fr9jvjsrqr";
+    "x86_64-darwin".sha256 = "0d654rr4p847an6dl4z6nah5hqy6s5qb58qz0sms7gvph8xlrjpa";
     "aarch64-darwin".os_arch = "darwin-arm64";
-    "aarch64-darwin".sha256 = "1dwi5vnwihsh1p81kyqbb4pzpidcsgjp8vx2d5w30xy8iqrsximd";
+    "aarch64-darwin".sha256 = "0r6801n5b1dxv7h4xyxj8h704appi921m11byvwjqzjjkqbpzhjp";
   }.${pkgs.system};
 
-  databricksCliVersion = "1.10.0";
+  databricksCliVersion = "1.13.0";
   databricksCliPlatform = {
     "x86_64-linux".os_arch = "linux_amd64";
-    "x86_64-linux".sha256 = "70f4c0c817c6e5e6e1450cc8489cd09902ced6ce85343cd0a31c83222939ef53";
+    "x86_64-linux".sha256 = "0a94deffe3c9f1109020c91ac744a25bf45dc833ac302f8192892779e25b3df7";
     "aarch64-linux".os_arch = "linux_arm64";
-    "aarch64-linux".sha256 = "f5507e047b14597a8663afb94f54c6421ade52f882df821eccd09a8d23425694";
+    "aarch64-linux".sha256 = "d5d76344781663267e1f69938b015cd4994e4361651bb63bd6a989e1d2227912";
     "x86_64-darwin".os_arch = "darwin_amd64";
-    "x86_64-darwin".sha256 = "f3e389307910577d8d834dc75331a9f5a4bc326e7210894f61160bcb113cd765";
+    "x86_64-darwin".sha256 = "e00ceb97015f9a57483e5a839f5cd42537e7c0fc3975a81a34a5a2c71c69ae16";
     "aarch64-darwin".os_arch = "darwin_arm64";
-    "aarch64-darwin".sha256 = "40908d38e2d25704bd8b7d043cef085e5a8844a31eb4451eeb125d12bd40b781";
+    "aarch64-darwin".sha256 = "e5f863698d13c8723e033f4a0188295634f1052687b02dd535cda80ab9020569";
   }.${pkgs.system};
 
   azureCli = pkgs.azure-cli.withExtensions (with pkgs.azure-cli-extensions; [
