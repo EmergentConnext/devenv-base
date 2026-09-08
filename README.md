@@ -26,6 +26,8 @@ prompts, e.g. `pulumi up`'s confirmation):
   directory, taking a positional environment argument (default `dev`) e.g. `infra-plan test`
 - `bundle-validate`, `bundle-deploy` — Databricks Asset Bundles, via the `DEFAULT` CLI profile
 - `deploy` — `infra-deploy` → `bundle-deploy`
+- `update-base` — updates a consuming project's `devenv-base` input and re-pins its `nixpkgs` to
+  match (see [Keeping nixpkgs in sync](#keeping-nixpkgs-in-sync))
 
 These scripts assume a project layout: a Python project with its own `pyproject.toml` (for `uv
 sync`), an `infra/` directory (Pulumi), and a `databricks.yml` (Asset Bundles). These components are
@@ -93,3 +95,30 @@ scripts, environment variables, etc.
 `permitted_unfree_packages` (`databricks-cli` is marked unfree in nixpkgs) currently has to be
 declared again in the consuming project's own `devenv.yaml`; devenv doesn't yet recursively
 resolve an imported project's own `devenv.yaml` inputs, only its `devenv.nix`.
+
+### Keeping nixpkgs in sync
+
+This module is evaluated against the *consuming* project's `nixpkgs`, so a project on a different
+nixpkgs revision than this repo builds different derivations: no `emergent-connext` cache hits, and
+a toolchain that drifts from the published container image. Consumers should therefore pin `nixpkgs`
+to whatever this repo locks, rather than tracking `rolling` independently:
+
+```yaml
+inputs:
+  nixpkgs:
+    # Managed by `update-base` -- don't edit by hand.
+    url: github:cachix/devenv-nixpkgs/<rev>
+```
+
+To move a project to the current base, run from its root:
+
+```sh
+update-base
+```
+
+Commit the resulting `devenv.yaml`/`devenv.lock` changes.
+
+The idiomatic devenv equivalent is `inputs.nixpkgs.follows: devenv-base/nixpkgs`, but devenv
+composes an imported project's `devenv.yaml` inputs only for local `path:` inputs, not remote ones.
+Once remote composition is supported, `imports: - devenv-base` will cover both and `update-base` can
+go away.

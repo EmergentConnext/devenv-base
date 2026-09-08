@@ -25,6 +25,9 @@ let
     "aarch64-darwin".sha256 = "e5f863698d13c8723e033f4a0188295634f1052687b02dd535cda80ab9020569";
   }.${pkgs.system};
 
+  # Interpreter for update-base.py
+  updateBasePython = pkgs.python3.withPackages (ps: [ ps.ruamel-yaml ]);
+
   azureCli = pkgs.azure-cli.withExtensions (with pkgs.azure-cli-extensions; [
     account
     application-insights
@@ -49,7 +52,7 @@ in
 {
   # https://devenv.sh/binary-caching
   cachix.pull = [ "emergent-connext" ];
-  cachix.push = "emergent-connext";
+  cachix.push = (if builtins.getEnv "CI" == "true" then "emergent-connext" else null);
 
   overlays = [
     (final: prev: {
@@ -113,6 +116,17 @@ in
     # This headless build is compatible with Spark without the GUI/X11 toolkit (~35% smaller)
     jdk.package = pkgs.jre_headless;
   };
+
+  scripts."update-base".exec = strict ''
+    if [ ! -f devenv.yaml ]; then
+      echo "update-base: run from a project root (no devenv.yaml here)" >&2
+      exit 1
+    fi
+
+    devenv update devenv-base
+    ${updateBasePython}/bin/python3 ${./update-base.py}
+    devenv update nixpkgs
+  '';
 
   # === Code quality / tests ===
   # devenv scripts: run directly in the shell, stream output live, behave like any
