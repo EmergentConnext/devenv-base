@@ -1,28 +1,28 @@
 { pkgs, lib, config, inputs, ... }:
 
 let
-  pulumiVersion = "3.259.0";
+  pulumiVersion = "3.261.0";
   pulumiPlatform = {
     "x86_64-linux".os_arch = "linux-x64";
-    "x86_64-linux".sha256 = "1r8qyyjm94j5fz3k8gz11k3pn3ywk00b1i44813h2gf2r9x3bfll";
+    "x86_64-linux".sha256 = "0lw8m9528zc9vi9cqz3kifk57p1gghrsgmzs75hasbp24wj0vg1r";
     "aarch64-linux".os_arch = "linux-arm64";
-    "aarch64-linux".sha256 = "0lv892zyg209k3chd9wh88j8m76sc98cz0ng6sxn08d7cds35j7d";
+    "aarch64-linux".sha256 = "037vyq0kc6911i590wfx00cjysyi3iv444bchj3n00amjk0ba6k3";
     "x86_64-darwin".os_arch = "darwin-x64";
-    "x86_64-darwin".sha256 = "0d654rr4p847an6dl4z6nah5hqy6s5qb58qz0sms7gvph8xlrjpa";
+    "x86_64-darwin".sha256 = "15fknr1971w2lajcd2hb32d4wjh4zza65d0cd4bksglq4j4g9c1n";
     "aarch64-darwin".os_arch = "darwin-arm64";
-    "aarch64-darwin".sha256 = "0r6801n5b1dxv7h4xyxj8h704appi921m11byvwjqzjjkqbpzhjp";
+    "aarch64-darwin".sha256 = "1klzks4zmwh55n8rcws4jb5d0nznmbgf79pnk9cli36y015hbybc";
   }.${pkgs.system};
 
-  databricksCliVersion = "1.13.0";
+  databricksCliVersion = "1.15.0";
   databricksCliPlatform = {
     "x86_64-linux".os_arch = "linux_amd64";
-    "x86_64-linux".sha256 = "0a94deffe3c9f1109020c91ac744a25bf45dc833ac302f8192892779e25b3df7";
+    "x86_64-linux".sha256 = "aa6d89c8f59ad1fb6e5beef48599eedbb81f9ce92675954765ca7cbb4f539bcd";
     "aarch64-linux".os_arch = "linux_arm64";
-    "aarch64-linux".sha256 = "d5d76344781663267e1f69938b015cd4994e4361651bb63bd6a989e1d2227912";
+    "aarch64-linux".sha256 = "a94498c16898b2af0aad5fbbf3bcfb89b7d59c994f3ce4a5387d05dbac29b994";
     "x86_64-darwin".os_arch = "darwin_amd64";
-    "x86_64-darwin".sha256 = "e00ceb97015f9a57483e5a839f5cd42537e7c0fc3975a81a34a5a2c71c69ae16";
+    "x86_64-darwin".sha256 = "af66054f706310a9d4730f3abab17afd075af89e38f04b52c06cea0a22ca830b";
     "aarch64-darwin".os_arch = "darwin_arm64";
-    "aarch64-darwin".sha256 = "e5f863698d13c8723e033f4a0188295634f1052687b02dd535cda80ab9020569";
+    "aarch64-darwin".sha256 = "1d4dbb13c2ed19bda9a5425b422e3103f70c5fc66b13b808fbdbb133262cd032";
   }.${pkgs.system};
 
   # Interpreter for update-base.py
